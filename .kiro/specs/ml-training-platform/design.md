@@ -2,14 +2,18 @@
 
 ## Overview
 
-The ML Training Platform is a web-based application that democratizes machine learning by providing an intuitive interface for users to train models without coding. The platform follows a modern web architecture with a Python backend leveraging scikit-learn for ML capabilities and a React frontend for interactive user experiences.
+The Machine Learning Training Platform provides an easy-to-use web-based application that allows any user to develop models without the need to write code. This platform uses a standard modern web architecture, with Python-based back-end servers running ‘scikit-learn’ to enable the machine learning features and React-based front-end technology for an engaging interaction experience.
 
-The system is designed around a pipeline pattern that guides users through a step-by-step workflow: dataset upload → task configuration → algorithm selection → hyperparameter tuning → model training → evaluation → comparison → export. This approach ensures reproducible results while maintaining simplicity for beginner users.
+The application has been structured using a pipeline model, taking users through the step-by-step process of uploading datasets to create models, configuring tasks, selecting algorithms, optimising hyperparameters, training models, evaluating those models, comparing model outputs and exporting model-related content. This type of structured model guarantees repeatability of results while aiding novice users by keeping things simple and straightforward.
 
 ## Architecture
 
-The platform uses a three-tier architecture:
+Architecture Diagram :
+## 
+<img width="853" height="1280" alt="image" src="https://github.com/user-attachments/assets/ccb4c4aa-d720-4799-a6d2-8ccbf6acf38c" />
 
+### The platform uses a three-tier architecture:
+_____
 ### Frontend Layer (React)
 
 - **React SPA**: Single-page application providing responsive user interface
@@ -31,44 +35,6 @@ The platform uses a three-tier architecture:
 - **File Storage**: Local filesystem for CSV datasets and model files
 - **Session Storage**: In-memory storage for training sessions and temporary data
 - **Model Registry**: Organized storage for trained models with metadata
-
-```mermaid
-graph TB
-    subgraph "Frontend (React)"
-        UI[User Interface]
-        Charts[Visualization Components]
-        Forms[Configuration Forms]
-    end
-
-    subgraph "Backend (Flask/FastAPI)"
-        API[REST API]
-        Pipeline[ML Pipeline Service]
-        Training[Model Training Service]
-        FileProc[File Processing Service]
-        Storage[Model Storage Service]
-    end
-
-    subgraph "Data Layer"
-        Files[File Storage]
-        Session[Session Storage]
-        Registry[Model Registry]
-    end
-
-    UI --> API
-    Charts --> API
-    Forms --> API
-
-    API --> Pipeline
-    API --> Training
-    API --> FileProc
-    API --> Storage
-
-    Pipeline --> Training
-    Training --> Registry
-    FileProc --> Files
-    Storage --> Files
-    Storage --> Session
-```
 
 ## Components and Interfaces
 
