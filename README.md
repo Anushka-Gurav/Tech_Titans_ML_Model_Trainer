@@ -2,7 +2,7 @@
 
 A full-stack machine learning training and comparison platform with a futuristic terminal-inspired interface. Train, evaluate, and compare multiple ML models with an intuitive dashboard.
 ---
-🔹 Demo Video: <add_youtube_link>
+🔹 Live Project : https://ml-model-trainer.netlify.app/
 
 🔹 Blog: <add_blog_link>
 
@@ -12,19 +12,19 @@ A full-stack machine learning training and comparison platform with a futuristic
 
 ---
 
-## IDE Used : KIRO (Best IDE for Project Developement)
+## IDE Used : KIRO (Best IDE for Project Developement) (https://kiro.dev/downloads/)
 Usage : 
-- **Logged into Kiro IDE using AWS Builder ID for secure and seamless access.
-- **Enabled Spec + Vibe Autopilot to convert the idea into a structured specification.
-- **Used the generated Spec to automatically create:
-Requirements document
-Design document
-task.md for execution planning
-Developed the ML Model Trainer following the Kiro-generated task flow.
-Implemented an Agent Hook to automatically log system actions and decision history during dataset upload, model training, and evaluation.
-Used Kiro Testing (Pytest) to generate and run automated end-to-end tests for the complete pipeline.
-Deployed the frontend using Kiro.dev with Netlify integration directly from the Kiro environment.
-Completed the entire ideation-to-deployment lifecycle within Kiro IDE, without switching tools.
+- Logged into Kiro IDE using AWS Builder ID for secure and seamless access.
+- Enabled Spec + Vibe Autopilot to convert the idea into a structured specification.
+- Used the generated Spec to automatically create:
+   1) Requirements document
+   2) Design document
+   3) task.md for execution planning
+- Developed the ML Model Trainer following the Kiro-generated task flow.
+- Implemented an Agent Hook to automatically log system actions and decision history during dataset upload, model training, and evaluation.
+- Used Kiro Testing (Pytest) to generate and run automated end-to-end tests for the complete pipeline.
+- Deployed the frontend using Kiro.dev with Netlify integration directly from the Kiro environment.
+- Completed the entire ideation-to-deployment lifecycle within Kiro IDE, without switching tools.
 ## Features
 
 ### Core Capabilities
