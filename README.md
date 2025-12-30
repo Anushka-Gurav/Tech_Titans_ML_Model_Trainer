@@ -10,6 +10,8 @@ A full-stack machine learning training and comparison platform with a futuristic
 
 🔹 Document Link : https://www.notion.so/Smart-ML-Model-Trainer-2d92368f3571805ba7f2cb12c380c05b?source=copy_link
 
+🔹 LinkedIn Post : https://hosturl.link/B0QujU
+
 <img width="1898" height="904" alt="image" src="https://github.com/user-attachments/assets/ce3fe705-36d0-429b-a554-5ecfa86d1e96" />
 
 ---
