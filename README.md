@@ -4,9 +4,9 @@ A full-stack machine learning training and comparison platform with a futuristic
 ---
 🔹 Live Project : https://ml-model-trainer.netlify.app/
 
-🔹 Blog: <add_blog_link>
+🔹 Blog : (https://medium.com/@shraddhamane829/building-a-smart-ml-model-trainer-our-journey-from-idea-to-implementation-55328bc6b61e)
 
-🔹 Live Project: <add_project_link>
+🔹 Demo Link : 
 
 <img width="1898" height="904" alt="image" src="https://github.com/user-attachments/assets/ce3fe705-36d0-429b-a554-5ecfa86d1e96" />
 
