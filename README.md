@@ -6,7 +6,7 @@ A full-stack machine learning training and comparison platform with a futuristic
 
 🔹 Blog : (https://medium.com/@shraddhamane829/building-a-smart-ml-model-trainer-our-journey-from-idea-to-implementation-55328bc6b61e)
 
-🔹 Demo Link : https://lnkd.in/dwvnnxwK
+🔹 Demo Link : https://youtu.be/Nkvgav4WiUg?si=ZrbCezUzM3QpSxPi
 
 🔹 Document Link : https://www.notion.so/Smart-ML-Model-Trainer-2d92368f3571805ba7f2cb12c380c05b?source=copy_link
 
