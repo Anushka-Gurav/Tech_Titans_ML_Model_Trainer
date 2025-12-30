@@ -2,7 +2,7 @@
 
 ## Overview
 
-This implementation plan creates a web-based ML Model Training Platform from scratch, following the three-tier architecture specified in the design document. The platform will use Python/Flask for the backend with scikit-learn for ML capabilities, and React for the frontend interface.
+This implementation plan builds a web-based Machine Learning Model Training Platform from scratch, using the Three-Tier Architecture documented in the Design Document. This platform will leverage Python as the back-end programming language using Flask framework with Scikit-learn libraries integrated for Machine Learning functionality; React.js will be used for the front-end interface.
 
 ## Tasks
 
@@ -234,12 +234,3 @@ This implementation plan creates a web-based ML Model Training Platform from scr
     - Verify training progress accuracy
     - Test model comparison functionality
     - _Requirements: 1.4, 4.2, 6.1_
-
-## Notes
-
-- Each task builds incrementally on previous implementations
-- All tasks focus on coding activities that can be completed by a development agent
-- Tasks reference specific requirements for traceability
-- The implementation follows the three-tier architecture from the design document
-- Frontend and backend can be developed in parallel after initial setup
-- Testing is integrated throughout the development process
