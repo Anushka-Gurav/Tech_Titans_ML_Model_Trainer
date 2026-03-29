@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  # ── MongoDB Database ──
+  mongo:
+    image: mongo:6.0
+    container_name: ml_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - ml_network
+
+  # ── FastAPI Backend ──
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ml_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+      - DATABASE_NAME=ml_trainer
+    depends_on:
+      - mongo
+    networks:
+      - ml_network
+    volumes:
+      - ./backend:/app
+
+  # ── React Frontend ──
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ml_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - ml_network
+
+networks:
+  ml_network:
+    driver: bridge
+
+volumes:
+  mongo_data:
