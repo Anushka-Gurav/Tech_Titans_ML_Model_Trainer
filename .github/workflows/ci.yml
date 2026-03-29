@@ -51,40 +51,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ✅ Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🟢 Set up Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: 🔍 Find frontend folder
-        run: |
-          echo "Root contents:"
-          ls -la
-          echo "Looking for package.json..."
-          find . -name "package.json" -not -path "*/node_modules/*"
-
       - name: 📦 Install frontend dependencies
         run: |
-          if [ -d "frontend" ]; then
-            cd frontend && npm install
-          elif [ -f "package.json" ]; then
-            npm install
-          else
-            echo "No frontend folder found, skipping"
-          fi
+          echo "All folders in root:"
+          ls -la
+          echo "---"
+          # Find where package.json actually is
+          FRONTEND_DIR=$(find . -maxdepth 2 -name "package.json" \
+            -not -path "*/node_modules/*" \
+            -not -path "./.git/*" \
+            | head -1 | xargs dirname)
+          echo "Found frontend at: $FRONTEND_DIR"
+          cd $FRONTEND_DIR && npm install
 
-      - name: 🏗️ Build React app
+      - name: Build React app
         run: |
-          if [ -d "frontend" ]; then
-            cd frontend && npm run build
-          elif [ -f "package.json" ]; then
-            npm run build
-          else
-            echo "No frontend folder found, skipping"
-          fi
+          FRONTEND_DIR=$(find . -maxdepth 2 -name "package.json" \
+            -not -path "*/node_modules/*" \
+            -not -path "./.git/*" \
+            | head -1 | xargs dirname)
+          cd $FRONTEND_DIR && npm run build
         continue-on-error: true
 
   # ════════════════════════════════
