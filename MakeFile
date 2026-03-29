@@ -1,0 +1,35 @@
+# ── Backend ──
+install-backend:
+	cd backend && pip install -r requirements.txt
+
+lint:
+	cd backend && flake8 . --max-line-length=100 \
+	  --exclude=__pycache__,tests,venv,.git
+
+test:
+	cd backend && pytest tests/ -v --tb=short
+
+# ── Frontend ──
+install-frontend:
+	cd frontend && npm install
+
+build-frontend:
+	cd frontend && npm run build
+
+# ── Docker ──
+docker-build:
+	docker-compose build
+
+docker-up:
+	docker-compose up -d
+
+docker-down:
+	docker-compose down
+
+docker-logs:
+	docker-compose logs -f
+
+# ── All in one ──
+install: install-backend install-frontend
+
+all: install lint test docker-build
