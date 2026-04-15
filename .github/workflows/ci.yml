@@ -2,103 +2,120 @@ name: CI/CD Pipeline — ML Model Trainer
 
 on:
   push:
-    branches: [main, develop, feature, new_feature]
+    branches:
+      - main
+      - develop
+      - feature
+      - new_feature
+
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   backend-ci:
-  name: 🐍 Backend — Lint & Test
-  runs-on: ubuntu-latest
+    name: 🐍 Backend — Lint & Test
+    runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Show project structure
-      run: |
-        pwd
-        find . -maxdepth 3
+      - name: Show project structure
+        run: |
+          pwd
+          find . -maxdepth 3
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-    - name: Find backend folder and install dependencies
-      run: |
-        BACKEND_DIR=$(find . -maxdepth 3 -name "requirements.txt" | head -1 | xargs dirname)
+      - name: Find backend folder and install dependencies
+        run: |
+          REQUIREMENTS_FILE=$(find . -maxdepth 3 -name "requirements.txt" | head -1)
 
-        echo "Backend found at: $BACKEND_DIR"
+          if [ -z "$REQUIREMENTS_FILE" ]; then
+            echo "No requirements.txt found!"
+            exit 1
+          fi
 
-        cd "$BACKEND_DIR"
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install flake8 pytest
+          BACKEND_DIR=$(dirname "$REQUIREMENTS_FILE")
+          echo "Backend found at: $BACKEND_DIR"
 
-    - name: Run flake8
-      run: |
-        BACKEND_DIR=$(find . -maxdepth 3 -name "requirements.txt" | head -1 | xargs dirname)
-        cd "$BACKEND_DIR"
-        flake8 . --max-line-length=120 || true
+          cd "$BACKEND_DIR"
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 pytest
 
-    - name: Run pytest
-      run: |
-        BACKEND_DIR=$(find . -maxdepth 3 -name "requirements.txt" | head -1 | xargs dirname)
-        cd "$BACKEND_DIR"
-        pytest tests/ -v --tb=short || true
+      - name: Run flake8
+        run: |
+          REQUIREMENTS_FILE=$(find . -maxdepth 3 -name "requirements.txt" | head -1)
+          BACKEND_DIR=$(dirname "$REQUIREMENTS_FILE")
+
+          cd "$BACKEND_DIR"
+          flake8 . --max-line-length=120 || true
+
+      - name: Run pytest
+        run: |
+          REQUIREMENTS_FILE=$(find . -maxdepth 3 -name "requirements.txt" | head -1)
+          BACKEND_DIR=$(dirname "$REQUIREMENTS_FILE")
+
+          cd "$BACKEND_DIR"
+          pytest tests/ -v --tb=short || true
 
   frontend-ci:
-  name: ⚛️ Frontend — Install & Build
-  runs-on: ubuntu-latest
+    name: ⚛️ Frontend — Install & Build
+    runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Show project structure
-      run: |
-        pwd
-        find . -maxdepth 3
+      - name: Show project structure
+        run: |
+          pwd
+          find . -maxdepth 3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: "20"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
-    - name: Find frontend folder and install dependencies
-      run: |
-        PACKAGE_FILE=$(find . -maxdepth 3 -name "package.json" \
-          -not -path "*/node_modules/*" \
-          | head -1)
+      - name: Find frontend folder and install dependencies
+        run: |
+          PACKAGE_FILE=$(find . -maxdepth 3 -name "package.json" \
+            -not -path "*/node_modules/*" \
+            | head -1)
 
-        if [ -z "$PACKAGE_FILE" ]; then
-          echo "No package.json found!"
-          exit 1
-        fi
+          if [ -z "$PACKAGE_FILE" ]; then
+            echo "No package.json found!"
+            exit 1
+          fi
 
-        FRONTEND_DIR=$(dirname "$PACKAGE_FILE")
+          FRONTEND_DIR=$(dirname "$PACKAGE_FILE")
+          echo "Frontend found at: $FRONTEND_DIR"
 
-        echo "Frontend found at: $FRONTEND_DIR"
+          cd "$FRONTEND_DIR"
+          npm install
 
-        cd "$FRONTEND_DIR"
-        npm install
+      - name: Build React app
+        run: |
+          PACKAGE_FILE=$(find . -maxdepth 3 -name "package.json" \
+            -not -path "*/node_modules/*" \
+            | head -1)
 
-    - name: Build React app
-      run: |
-        PACKAGE_FILE=$(find . -maxdepth 3 -name "package.json" \
-          -not -path "*/node_modules/*" \
-          | head -1)
+          FRONTEND_DIR=$(dirname "$PACKAGE_FILE")
 
-        FRONTEND_DIR=$(dirname "$PACKAGE_FILE")
-
-        cd "$FRONTEND_DIR"
-        npm run build
+          cd "$FRONTEND_DIR"
+          npm run build
 
   docker-build:
     name: 🐳 Docker — Build All Images
     runs-on: ubuntu-latest
-    needs: [backend-ci, frontend-ci]
+    needs:
+      - backend-ci
+      - frontend-ci
 
     steps:
       - name: Checkout code
@@ -107,17 +124,29 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build using docker-compose
-        if: hashFiles('docker-compose.yml') != ''
-        run: docker compose build
+      - name: Build docker-compose if present
+        run: |
+          if [ -f docker-compose.yml ]; then
+            docker compose build
+          else
+            echo "No docker-compose.yml found"
+          fi
 
       - name: Build backend Docker image
-        if: hashFiles('backend/Dockerfile') != ''
-        run: docker build -t ml-backend ./backend
+        run: |
+          if [ -f backend/Dockerfile ]; then
+            docker build -t ml-backend ./backend
+          else
+            echo "No backend Dockerfile found"
+          fi
 
       - name: Build frontend Docker image
-        if: hashFiles('frontend/Dockerfile') != ''
-        run: docker build -t ml-frontend ./frontend
+        run: |
+          if [ -f frontend/Dockerfile ]; then
+            docker build -t ml-frontend ./frontend
+          else
+            echo "No frontend Dockerfile found"
+          fi
 
       - name: Show built images
         run: docker images
@@ -125,11 +154,11 @@ jobs:
   deploy:
     name: 🚀 Deploy to Render
     runs-on: ubuntu-latest
-    needs: [docker-build]
+    needs: docker-build
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Trigger Render deploy
+      - name: Trigger Render Deploy
         run: |
           if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
