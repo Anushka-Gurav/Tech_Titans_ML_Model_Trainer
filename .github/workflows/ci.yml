@@ -8,74 +8,92 @@ on:
 
 jobs:
   backend-ci:
-    name: 🐍 Backend — Lint & Test
-    runs-on: ubuntu-latest
+  name: 🐍 Backend — Lint & Test
+  runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
+    - name: Show project structure
+      run: |
+        pwd
+        find . -maxdepth 3
 
-      - name: Install backend dependencies
-        working-directory: backend
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install flake8 pytest
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
 
-      - name: Lint with flake8
-        working-directory: backend
-        run: |
-          flake8 . --max-line-length=120 \
-            --exclude=__pycache__,tests,venv,.git,migrations \
-            --ignore=E501,W503,E302,E303,W291,W293,F401 \
-            --statistics
-        continue-on-error: true
+    - name: Find backend folder and install dependencies
+      run: |
+        BACKEND_DIR=$(find . -maxdepth 3 -name "requirements.txt" | head -1 | xargs dirname)
 
-      - name: Run pytest
-        working-directory: backend
-        run: |
-          pytest tests/ -v --tb=short
-        continue-on-error: true
+        echo "Backend found at: $BACKEND_DIR"
+
+        cd "$BACKEND_DIR"
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8 pytest
+
+    - name: Run flake8
+      run: |
+        BACKEND_DIR=$(find . -maxdepth 3 -name "requirements.txt" | head -1 | xargs dirname)
+        cd "$BACKEND_DIR"
+        flake8 . --max-line-length=120 || true
+
+    - name: Run pytest
+      run: |
+        BACKEND_DIR=$(find . -maxdepth 3 -name "requirements.txt" | head -1 | xargs dirname)
+        cd "$BACKEND_DIR"
+        pytest tests/ -v --tb=short || true
 
   frontend-ci:
-    name: ⚛️ Frontend — Install & Build
-    runs-on: ubuntu-latest
+  name: ⚛️ Frontend — Install & Build
+  runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+    - name: Show project structure
+      run: |
+        pwd
+        find . -maxdepth 3
 
-      - name: Install frontend dependencies
-        run: |
-          FRONTEND_DIR=$(find . -maxdepth 2 -name "package.json" \
-            -not -path "*/node_modules/*" \
-            -not -path "./.git/*" \
-            | head -1 | xargs dirname)
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
 
-          echo "Frontend found at: $FRONTEND_DIR"
-          cd "$FRONTEND_DIR"
-          npm install
+    - name: Find frontend folder and install dependencies
+      run: |
+        PACKAGE_FILE=$(find . -maxdepth 3 -name "package.json" \
+          -not -path "*/node_modules/*" \
+          | head -1)
 
-      - name: Build React app
-        run: |
-          FRONTEND_DIR=$(find . -maxdepth 2 -name "package.json" \
-            -not -path "*/node_modules/*" \
-            -not -path "./.git/*" \
-            | head -1 | xargs dirname)
+        if [ -z "$PACKAGE_FILE" ]; then
+          echo "No package.json found!"
+          exit 1
+        fi
 
-          cd "$FRONTEND_DIR"
-          npm run build
-        continue-on-error: true
+        FRONTEND_DIR=$(dirname "$PACKAGE_FILE")
+
+        echo "Frontend found at: $FRONTEND_DIR"
+
+        cd "$FRONTEND_DIR"
+        npm install
+
+    - name: Build React app
+      run: |
+        PACKAGE_FILE=$(find . -maxdepth 3 -name "package.json" \
+          -not -path "*/node_modules/*" \
+          | head -1)
+
+        FRONTEND_DIR=$(dirname "$PACKAGE_FILE")
+
+        cd "$FRONTEND_DIR"
+        npm run build
 
   docker-build:
     name: 🐳 Docker — Build All Images
