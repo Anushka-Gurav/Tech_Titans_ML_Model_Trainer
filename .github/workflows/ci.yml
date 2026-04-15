@@ -33,7 +33,7 @@ jobs:
 
       - name: Find backend folder and install dependencies
         run: |
-          REQUIREMENTS_FILE=$(find . -maxdepth 3 -name "requirements.txt" | head -1)
+          REQUIREMENTS_FILE=$(find . -maxdepth 10 -name "requirements.txt" | head -1)
 
           if [ -z "$REQUIREMENTS_FILE" ]; then
             echo "No requirements.txt found!"
@@ -84,7 +84,7 @@ jobs:
 
       - name: Find frontend folder and install dependencies
         run: |
-          PACKAGE_FILE=$(find . -maxdepth 3 -name "package.json" \
+          PACKAGE_FILE=$(find . -maxdepth 10 -name "package.json" \
             -not -path "*/node_modules/*" \
             | head -1)
 
