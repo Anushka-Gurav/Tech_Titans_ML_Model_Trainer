@@ -82,7 +82,7 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install frontend dependencies
+            - name: Install frontend dependencies
         run: |
           if [ -f frontend/package.json ]; then
             echo "package.json found in frontend/"
@@ -90,12 +90,9 @@ jobs:
             npm install
           else
             echo "package.json not found in frontend/"
-            echo "Creating temporary package.json for CI build"
-
             mkdir -p frontend
 
-            cat > frontend/package.json << 'EOF'
-            {
+            echo '{
               "name": "ml-model-trainer-frontend",
               "version": "1.0.0",
               "private": true,
@@ -110,8 +107,7 @@ jobs:
               "scripts": {
                 "build": "react-scripts build"
               }
-            }
-            EOF
+            }' > frontend/package.json
 
             cd frontend
             npm install
