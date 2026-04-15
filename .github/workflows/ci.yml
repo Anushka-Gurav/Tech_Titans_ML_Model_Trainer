@@ -82,7 +82,7 @@ jobs:
         with:
           node-version: "20"
 
-            - name: Install frontend dependencies
+      - name: Install frontend dependencies
         run: |
           if [ -f frontend/package.json ]; then
             echo "package.json found in frontend/"
