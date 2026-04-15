@@ -26,7 +26,9 @@ jobs:
       - name: 📦 Install backend dependencies
         run: |
           cd backend
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install flake8 pytest
 
       - name: 🔍 Lint with flake8
         run: |
@@ -47,58 +49,80 @@ jobs:
   #  JOB 2 — Frontend Build Check
   # ════════════════════════════════
   frontend-ci:
-    name: ⚛️ Frontend — Install & Build
-    runs-on: ubuntu-latest
+  name: ⚛️ Frontend — Install & Build
+  runs-on: ubuntu-latest
 
-    steps:
-      - name: 📦 Install frontend dependencies
-        run: |
-          echo "All folders in root:"
-          ls -la
-          echo "---"
-          # Find where package.json actually is
-          FRONTEND_DIR=$(find . -maxdepth 2 -name "package.json" \
-            -not -path "*/node_modules/*" \
-            -not -path "./.git/*" \
-            | head -1 | xargs dirname)
-          echo "Found frontend at: $FRONTEND_DIR"
-          cd $FRONTEND_DIR && npm install
+  steps:
+    - name: ✅ Checkout code
+      uses: actions/checkout@v4
 
-      - name: Build React app
-        run: |
-          FRONTEND_DIR=$(find . -maxdepth 2 -name "package.json" \
-            -not -path "*/node_modules/*" \
-            -not -path "./.git/*" \
-            | head -1 | xargs dirname)
-          cd $FRONTEND_DIR && npm run build
-        continue-on-error: true
+    - name: 🟢 Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: 📦 Install frontend dependencies
+      run: |
+        echo "All folders in root:"
+        ls -la
+        echo "---"
+
+        FRONTEND_DIR=$(find . -maxdepth 2 -name "package.json" \
+          -not -path "*/node_modules/*" \
+          -not -path "./.git/*" \
+          | head -1 | xargs dirname)
+
+        echo "Found frontend at: $FRONTEND_DIR"
+        cd $FRONTEND_DIR
+        npm install
+
+    - name: 🏗️ Build React app
+      run: |
+        FRONTEND_DIR=$(find . -maxdepth 2 -name "package.json" \
+          -not -path "*/node_modules/*" \
+          -not -path "./.git/*" \
+          | head -1 | xargs dirname)
+
+        cd $FRONTEND_DIR
+        npm run build
 
   # ════════════════════════════════
   #  JOB 3 — Docker Build
   # ════════════════════════════════
   docker-build:
-    name: 🐳 Docker — Build All Images
-    runs-on: ubuntu-latest
-    needs: [backend-ci, frontend-ci]
+  name: 🐳 Docker — Build All Images
+  runs-on: ubuntu-latest
+  needs: [backend-ci, frontend-ci]
 
-    steps:
-      - name: ✅ Checkout code
-        uses: actions/checkout@v4
+  steps:
+    - name: ✅ Checkout code
+      uses: actions/checkout@v4
 
-      - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-      - name: 🔨 Build Docker images
-        run: |
-          if [ -f "docker-compose.yml" ]; then
-            docker compose build
-          else
-            echo "No docker-compose.yml found"
-            if [ -f "backend/Dockerfile" ]; then
-              docker build -t ml-backend ./backend
-            fi
-          fi
-        continue-on-error: true
+    - name: 🔍 Check available Docker files
+      run: |
+        echo "Project structure:"
+        find . -maxdepth 3 \( -name "Dockerfile" -o -name "docker-compose.yml" \)
+
+    - name: 🔨 Build using docker-compose
+      if: hashFiles('docker-compose.yml') != ''
+      run: |
+        docker compose build
+
+    - name: 🔨 Build Backend Docker Image
+      if: hashFiles('backend/Dockerfile') != ''
+      run: |
+        docker build -t ml-backend ./backend
+
+    - name: 🔨 Build Frontend Docker Image
+      if: hashFiles('frontend/Dockerfile') != ''
+      run: |
+        docker build -t ml-frontend ./frontend
+
+    - name: 📋 Show Built Images
+      run: docker images
 
   # ════════════════════════════════
   #  JOB 4 — Deploy to Render
