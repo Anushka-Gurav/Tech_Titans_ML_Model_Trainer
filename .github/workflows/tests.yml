@@ -65,4 +65,4 @@ jobs:
       - name: Run Selenium UI tests
         run: |
           cd backend
-          pytest tests/test_ml_platform_final.py -v -k "TestSeleniumFrontend"
+          pytest tests/test_ml_platform_final.py -v
