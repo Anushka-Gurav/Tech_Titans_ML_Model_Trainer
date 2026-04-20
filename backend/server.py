@@ -1100,6 +1100,8 @@ async def upload_dataset(file: UploadFile = File(...)):
             "columns": len(df.columns),
             "preview": preview
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -1,0 +1,55 @@
+name: Run Automated Tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-html pytest-cov
+          pip install pandas numpy scikit-learn requests httpx
+          pip install selenium webdriver-manager python-multipart
+          pip install fastapi uvicorn python-dotenv motor
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          pytest tests/test_ml_platform_final.py -v -k "not TestSeleniumFrontend"
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Start frontend
+        run: |
+          cd frontend
+          start /B npm start
+        shell: cmd
+
+      - name: Wait for frontend
+        run: |
+          timeout /t 20
+
+      - name: Run Selenium UI tests
+        run: |
+          cd backend
+          pytest tests/test_ml_platform_final.py -v -k "TestSeleniumFrontend"
