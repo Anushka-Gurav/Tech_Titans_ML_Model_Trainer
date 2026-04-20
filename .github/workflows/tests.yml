@@ -46,8 +46,8 @@ jobs:
         shell: cmd
 
       - name: Wait for frontend
-        run: |
-          timeout /t 20
+        run: Start-Sleep -Seconds 20
+        shell: powershell
 
       - name: Run Selenium UI tests
         run: |
