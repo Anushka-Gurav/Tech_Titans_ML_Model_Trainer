@@ -46,8 +46,19 @@ jobs:
         shell: cmd
 
       - name: Wait for frontend
-        run: Start-Sleep -Seconds 20
         shell: powershell
+        run: |
+          for ($i = 0; $i -lt 30; $i++) {
+            try {
+              Invoke-WebRequest -Uri http://localhost:3000 -UseBasicParsing
+              Write-Host "Frontend is ready"
+              exit 0
+            } catch {
+              Write-Host "Waiting for frontend..."
+              Start-Sleep -Seconds 5
+            }
+          }
+          throw "Frontend did not start in time"
 
       - name: Run Selenium UI tests
         run: |

@@ -544,7 +544,7 @@ class TestSeleniumFrontend:
         os.makedirs("screenshots", exist_ok=True)
 
         options = Options()
-        # options.add_argument("--headless")
+        options.add_argument("--headless")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
 
