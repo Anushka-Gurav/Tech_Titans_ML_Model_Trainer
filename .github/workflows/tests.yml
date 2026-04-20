@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - new_feature
   pull_request:
 
 jobs:
@@ -40,23 +41,24 @@ jobs:
           npm install
 
       - name: Start frontend
+        shell: powershell
         run: |
-          cd frontend
-          start /B npm start
-        shell: cmd
+          Start-Process powershell -ArgumentList "-NoProfile -Command `"cd frontend; npm start`""
 
       - name: Wait for frontend
         shell: powershell
         run: |
-          for ($i = 0; $i -lt 30; $i++) {
+          for ($i = 0; $i -lt 60; $i++) {
             try {
-              Invoke-WebRequest -Uri http://localhost:3000 -UseBasicParsing
-              Write-Host "Frontend is ready"
-              exit 0
+              $response = Invoke-WebRequest -Uri http://localhost:3000 -UseBasicParsing
+              if ($response.StatusCode -eq 200) {
+                Write-Host "Frontend is ready"
+                exit 0
+              }
             } catch {
               Write-Host "Waiting for frontend..."
-              Start-Sleep -Seconds 5
             }
+            Start-Sleep -Seconds 5
           }
           throw "Frontend did not start in time"
 
