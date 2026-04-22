@@ -4,6 +4,7 @@ pipeline {
     environment {
         MONGO_URL = "mongodb://localhost:27017"
         DB_NAME   = "test_db"
+        PYTHON    = "C:\\Users\\Sana Khan\\AppData\\Local\\Programs\\Python\\Python310\\python.exe"
     }
 
     stages {
@@ -11,7 +12,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('backend') {
-                    bat '"C:\\Users\\Sana Khan\\AppData\\Local\\Programs\\Python\\Python310\\python.exe" -m pip install -r ..\\test-requirements.txt'
+                    bat "\"%PYTHON%\" -m pip install -r ..\\test-requirements.txt"
                 }
             }
         }
@@ -19,18 +20,30 @@ pipeline {
         stage('Test Backend') {
             steps {
                 dir('backend') {
-                    bat '"C:\\Users\\Sana Khan\\AppData\\Local\\Programs\\Python\\Python310\\python.exe" -m pytest'
+                    bat "\"%PYTHON%\" -m pytest"
                 }
             }
         }
 
         stage('Build Frontend') {
+            when {
+                expression { fileExists('frontend/package.json') }
+            }
             steps {
                 dir('frontend') {
                     bat 'npm install'
                     bat 'npm run build'
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'CI Pipeline executed successfully ✅'
+        }
+        failure {
+            echo 'CI Pipeline failed ❌'
         }
     }
 }
