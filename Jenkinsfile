@@ -6,7 +6,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('backend') {
-                    bat '"C:\\Users\\Sana Khan\\AppData\\Local\\Programs\\Python\\Python310\\python.exe" -m pip install -r test-requirements.txt'
+                    bat '"C:\\Users\\Sana Khan\\AppData\\Local\\Programs\\Python\\Python310\\python.exe" -m pip install -r ..\\test-requirements.txt'
                 }
             }
         }
