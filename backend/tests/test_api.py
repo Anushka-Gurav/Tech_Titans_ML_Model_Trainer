@@ -6,7 +6,7 @@ import os
 # Make sure backend folder is in path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import app  # import your FastAPI app
+from server import app  
 
 
 # ───── Health Check ─────
@@ -53,7 +53,7 @@ async def test_models_list_endpoint():
         transport=ASGITransport(app=app), base_url="http://test"
     ) as client:
         response = await client.get("/models")
-    assert response.status_code in [200, 404]  # 404 ok if route not yet built
+    assert response.status_code in [200, 404]
 
 
 # ───── Input Validation Test ─────
@@ -63,6 +63,4 @@ async def test_train_missing_fields():
         transport=ASGITransport(app=app), base_url="http://test"
     ) as client:
         response = await client.post("/train", json={})
-    # FastAPI returns 422 for missing required fields
     assert response.status_code in [400, 422]
-
