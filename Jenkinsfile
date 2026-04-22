@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        MONGO_URL = "mongodb://localhost:27017"
+    }
+
     stages {
 
         stage('Build Backend') {
