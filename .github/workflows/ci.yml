@@ -319,8 +319,8 @@ jobs:
           fi
       - name: Build backend Docker image
         run: |
-          if [ -f backend/DockerFile ]; then
-            docker build -t ml-backend -f backend/DockerFile ./backend
+          if [ -f backend/Dockerfile ]; then
+            docker build -t ml-backend -f backend/Dockerfile ./backend
           elif [ -f backend/Dockerfile ]; then
             docker build -t ml-backend ./backend
           else
@@ -328,8 +328,8 @@ jobs:
           fi
       - name: Build frontend Docker image
         run: |
-          if [ -f frontend/DockerFile ]; then
-            docker build -t ml-frontend -f frontend/DockerFile ./frontend
+          if [ -f frontend/Dockerfile ]; then
+            docker build -t ml-frontend -f frontend/Dockerfile ./frontend
           elif [ -f frontend/Dockerfile ]; then
             docker build -t ml-frontend ./frontend
           else
