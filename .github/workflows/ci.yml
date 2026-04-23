@@ -20,34 +20,35 @@ jobs:
       DB_NAME: test_db
 
     steps:
-      - name: Checkout code
+      - name: ✅ Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: 🐍 Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      - name: Install backend dependencies
+      - name: 📦 Install backend dependencies
         run: |
           cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install flake8 pytest pytest-asyncio httpx fastapi
 
-      - name: Run flake8 (optional)
+      - name: 🔍 Lint with flake8
         run: |
           cd backend
-          pip install flake8
           flake8 . --max-line-length=120 \
             --exclude=__pycache__,tests,venv,.git,migrations \
             --ignore=E501,W503,E302,E303,W291,W293,F401 \
-            --statistics || true
+            --statistics
+        continue-on-error: true
 
-      - name: Run pytest
+      - name: 🧪 Run pytest
         run: |
           cd backend
-          pip install pytest pytest-asyncio httpx fastapi
-          pytest tests/ -v --tb=short || true
+          pytest tests/ -v --tb=short
+        continue-on-error: true
 
 
   # ════════════════════════════════
@@ -58,30 +59,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: ✅ Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: 🟢 Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install frontend dependencies
+      - name: 🔍 Locate frontend directory
+        id: find-frontend
         run: |
-          if [ -f frontend/package.json ]; then
-            cd frontend
-            npm install
-          else
-            echo "No frontend found — skipping"
-          fi
+          echo "All files in root:"
+          ls -la
+          echo "---"
 
-      - name: Build frontend
+          FRONTEND_DIR=$(find . -maxdepth 2 -name "package.json" \
+            -not -path "*/node_modules/*" \
+            -not -path "./.git/*" \
+            | head -1 | xargs dirname)
+
+          echo "Found frontend at: $FRONTEND_DIR"
+          echo "frontend_dir=$FRONTEND_DIR" >> $GITHUB_OUTPUT
+
+      - name: 📦 Install frontend dependencies
         run: |
-          if [ -d frontend ]; then
-            cd frontend
-            if [ -f package.json ]; then
-              npm run build || true
-            fi
+          cd ${{ steps.find-frontend.outputs.frontend_dir }}
+          npm install
+
+      - name: 🏗️ Build React app
+        run: |
+          cd ${{ steps.find-frontend.outputs.frontend_dir }}
+          npm run build
+
+      - name: 📂 Confirm build output exists
+        run: |
+          FRONTEND_DIR=${{ steps.find-frontend.outputs.frontend_dir }}
+          if [ -d "$FRONTEND_DIR/build" ]; then
+            echo "✅ Build folder found:"
+            ls -la "$FRONTEND_DIR/build"
+          else
+            echo "❌ Build folder not found — something went wrong"
+            exit 1
           fi
 
 
@@ -94,54 +113,48 @@ jobs:
     needs: [backend-ci, frontend-ci]
 
     steps:
-      - name: Checkout code
+      - name: ✅ Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+      - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build docker-compose (if exists)
+      - name: 🔍 Check available Docker files
         run: |
-          if [ -f docker-compose.yml ]; then
-            docker compose build
-          else
-            echo "No docker-compose.yml found"
-          fi
+          echo "Project structure:"
+          find . -maxdepth 3 \( -name "Dockerfile" -o -name "docker-compose.yml" \)
 
-      - name: Build backend image
-        run: |
-          if [ -f backend/Dockerfile ]; then
-            docker build -t ml-backend ./backend
-          else
-            echo "No backend Dockerfile"
-          fi
+      - name: 🔨 Build using docker-compose
+        if: hashFiles('docker-compose.yml') != ''
+        run: docker compose build
 
-      - name: Build frontend image
-        run: |
-          if [ -f frontend/Dockerfile ]; then
-            docker build -t ml-frontend ./frontend
-          else
-            echo "No frontend Dockerfile"
-          fi
+      - name: 🔨 Build backend Docker image
+        if: hashFiles('backend/Dockerfile') != ''
+        run: docker build -t ml-backend ./backend
 
-      - name: Show images
+      - name: 🔨 Build frontend Docker image
+        if: hashFiles('frontend/Dockerfile') != ''
+        run: docker build -t ml-frontend ./frontend
+
+      - name: 📋 Show built images
         run: docker images
 
 
   # ════════════════════════════════
-  # JOB 4 — Deploy
+  # JOB 4 — Deploy to Render
   # ════════════════════════════════
   deploy:
     name: 🚀 Deploy to Render
     runs-on: ubuntu-latest
-    needs: docker-build
+    needs: [docker-build]
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Trigger Render Deploy
+      - name: 🚀 Trigger Render deploy
         run: |
           if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
             curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+            echo "✅ Render deploy triggered successfully"
           else
-            echo "No deploy hook — skipping"
+            echo "⚠️ No Render deploy hook configured — skipping"
           fi
