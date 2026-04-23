@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+motor
+pandas
+numpy
+scikit-learn
+xgboost
+matplotlib
+seaborn
+pytest
+flake8

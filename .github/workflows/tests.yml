@@ -1,0 +1,68 @@
+name: Run Automated Tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - new_feature
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-html pytest-cov
+          pip install pandas numpy scikit-learn requests httpx
+          pip install selenium webdriver-manager python-multipart
+          pip install fastapi uvicorn python-dotenv motor
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          pytest tests/test_ml_platform_final.py -v -k "not TestSeleniumFrontend"
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Start frontend
+        shell: powershell
+        run: |
+          Start-Process powershell -ArgumentList "-NoProfile -Command `"cd frontend; npm start`""
+
+      - name: Wait for frontend
+        shell: powershell
+        run: |
+          for ($i = 0; $i -lt 60; $i++) {
+            try {
+              $response = Invoke-WebRequest -Uri http://localhost:3000 -UseBasicParsing
+              if ($response.StatusCode -eq 200) {
+                Write-Host "Frontend is ready"
+                exit 0
+              }
+            } catch {
+              Write-Host "Waiting for frontend..."
+            }
+            Start-Sleep -Seconds 5
+          }
+          throw "Frontend did not start in time"
+
+      - name: Run Selenium UI tests
+        run: |
+          cd backend
+          pytest tests/test_ml_platform_final.py -v
