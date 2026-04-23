@@ -26,7 +26,7 @@ export default function Landing() {
               className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold mb-6"
               data-testid="hero-title"
             >
-              <span className="text-gradient">ML Training Platform</span>
+              <span className="text-gradient">ML Training Platformss</span>
             </h1>
             <p className="text-lg sm:text-xl text-textMuted max-w-3xl mx-auto mb-8" data-testid="hero-subtitle">
               Train machine learning models effortlessly. Upload your data, select an algorithm,
