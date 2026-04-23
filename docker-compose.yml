@@ -21,6 +21,7 @@ services:
     environment:
       - MONGO_URL=mongodb://mongo:27017
       - DATABASE_NAME=ml_trainer
+      - DB_NAME=ml_trainer   # ✅ ADDED (required fix)
     depends_on:
       - mongo
     networks:
